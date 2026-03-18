@@ -11,6 +11,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -18,6 +19,7 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setInfo("");
     setLoading(true);
 
     const { data, error: signUpError } = await supabase.auth.signUp({
@@ -31,18 +33,11 @@ export default function SignUpPage() {
       return;
     }
 
-    // If email confirmation is enabled, signUp may not create a session — sign in immediately.
+    // If email confirmation is enabled, Supabase does not return a session yet.
     if (!data.session) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        setError(signInError.message);
-        setLoading(false);
-        return;
-      }
+      setInfo("Account created. Check your email and confirm it before logging in.");
+      setLoading(false);
+      return;
     }
 
     router.push("/dashboard");
@@ -117,6 +112,12 @@ export default function SignUpPage() {
             {error && (
               <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
                 {error}
+              </p>
+            )}
+
+            {info && (
+              <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+                {info}
               </p>
             )}
 
